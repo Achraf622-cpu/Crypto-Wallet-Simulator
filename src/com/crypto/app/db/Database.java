@@ -53,7 +53,7 @@ public final class Database {
             connect(url.trim(), user, pass, driver);
         } else {
             // Default to a local Postgres database if not provided
-            connect("jdbc:postgresql://localhost:5432/crypto_wallet", "postgres", "postgres", "org.postgresql.Driver");
+            connect("jdbc:postgresql://localhost:5432/crypto_wallet", "postgres", "password", "org.postgresql.Driver");
         }
     }
 

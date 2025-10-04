@@ -4,7 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c41570b1-38cc-40f5-a308-0cdfc62b84aa" name="Changes" comment="" />
+    <list default="true" id="c41570b1-38cc-40f5-a308-0cdfc62b84aa" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/src/com/crypto/app/db/Database.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/crypto/app/db/Database.java" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
