@@ -1,10 +1,8 @@
 package com.crypto.app.db;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 public final class Database {
     private static Database INSTANCE;
@@ -21,12 +19,6 @@ public final class Database {
 
     public void connect(String jdbcUrl) {
         try {
-            // Ensure data directory exists for SQLite file URLs like jdbc:sqlite:data/app.db
-            if (jdbcUrl != null && jdbcUrl.startsWith("jdbc:sqlite:")) {
-                String path = jdbcUrl.substring("jdbc:sqlite:".length());
-                File f = new File(path).getParentFile();
-                if (f != null) f.mkdirs();
-            }
             this.connection = DriverManager.getConnection(jdbcUrl);
             this.connection.setAutoCommit(true);
         } catch (SQLException e) {
@@ -52,7 +44,7 @@ public final class Database {
         }
     }
 
-    public void connectFromEnvOrDefaultSqlite() {
+    public void connectFromEnvOrDefault() {
         String url = System.getenv("JDBC_URL");
         if (url != null && url.trim().length() > 0) {
             String user = System.getenv("JDBC_USER");
@@ -72,7 +64,7 @@ public final class Database {
         return connection;
     }
 
-    /
+
 }
 
 

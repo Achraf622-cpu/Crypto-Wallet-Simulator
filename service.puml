@@ -1,0 +1,39 @@
+@startuml
+class com.crypto.app.service.MempoolService {
+- {static} MempoolService INSTANCE
+- TransactionRepository txRepository
+- Random random
++ {static} MempoolService getInstance(TransactionRepository)
++ void regenerateRandomMempool(int,Transaction)
++ int calculatePosition(Transaction)
++ int getPendingCount()
++ List<Transaction> getPendingTransactionsOrdered()
+}
+
+
+class com.crypto.app.service.TransactionService {
+- TransactionRepository txRepository
+- InMemoryWalletRepository walletRepository
++ Transaction createTransaction(Wallet,String,String,BigDecimal,Priority)
++ Transaction createDraftTransaction(Wallet,String,String,BigDecimal,Priority)
+- Transaction buildTransaction(CryptoType,String,String,BigDecimal,Priority)
++ Transaction findById(String)
++ InMemoryWalletRepository getWalletRepository()
+}
+
+
+class com.crypto.app.service.WalletService {
+- InMemoryWalletRepository walletRepository
++ Wallet createWallet(CryptoType)
++ Wallet findById(String)
+}
+
+
+class com.crypto.app.service.DbPersistenceService {
+- Database db
++ void saveWallet(Wallet)
++ void saveTransaction(Transaction,String)
+}
+
+
+@enduml

@@ -1,0 +1,43 @@
+@startuml
+class com.crypto.app.repository.jdbc.JdbcWalletRepository {
+- Database db
++ Wallet save(Wallet)
++ Wallet findById(String)
++ List<Wallet> findAll()
+}
+
+
+interface com.crypto.app.repository.TransactionRepository {
+}
+class com.crypto.app.repository.InMemoryTransactionRepository {
+- Map<String,Transaction> store
++ Transaction save(Transaction)
++ Transaction findById(String)
++ List<Transaction> findAll()
+}
+
+
+class com.crypto.app.repository.InMemoryWalletRepository {
+- Map<String,Wallet> store
++ Wallet save(Wallet)
++ Wallet findById(String)
++ List<Wallet> findAll()
+}
+
+
+interface com.crypto.app.repository.WalletRepository {
+}
+interface com.crypto.app.repository.Repository {
+~ T save(T)
+~ T findById(String)
+~ List<T> findAll()
+}
+
+
+
+com.crypto.app.repository.WalletRepository <|.. com.crypto.app.repository.jdbc.JdbcWalletRepository
+com.crypto.app.repository.Repository <|-- com.crypto.app.repository.TransactionRepository
+com.crypto.app.repository.TransactionRepository <|.. com.crypto.app.repository.InMemoryTransactionRepository
+com.crypto.app.repository.Repository <|.. com.crypto.app.repository.InMemoryWalletRepository
+com.crypto.app.repository.Repository <|-- com.crypto.app.repository.WalletRepository
+@enduml

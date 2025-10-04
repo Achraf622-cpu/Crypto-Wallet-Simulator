@@ -1,0 +1,28 @@
+@startuml
+class com.crypto.app.util.ConsoleTable {
+- List<String> headers
+- List<List<String>> rows
++ void addRow(String)
++ String render()
+- String line(int[])
+- String row(List<String>,int[])
+- String padRight(String,int)
+}
+
+
+class com.crypto.app.util.InputValidator {
++ {static} boolean isValidAddress(String,CryptoType)
+}
+
+class com.crypto.app.util.RandomData {
+- {static} String BTC_CHARS
+- {static} String HEX
+- {static} Random RAND
++ {static} String randomBitcoinAddress()
++ {static} String randomEthereumAddress()
++ {static} Priority randomPriority()
++ {static} BigDecimal randomAmount(CryptoType)
+}
+
+
+@enduml
