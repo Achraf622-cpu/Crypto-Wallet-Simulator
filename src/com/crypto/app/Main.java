@@ -30,7 +30,7 @@ public class Main {
 
         // Always enable JDBC persistence
         DbPersistenceService dbService = null;
-        Database.getInstance().connectFromEnvOrDefaultSqlite();
+        Database.getInstance().connectFromEnvOrDefault();
         dbService = new DbPersistenceService();
         dbSvc = dbService;
         System.out.println("[INFO] JDBC persistence enabled (set JDBC_URL/JDBC_USER/JDBC_PASSWORD/JDBC_DRIVER as needed)");
@@ -44,7 +44,7 @@ public class Main {
                     createWalletFlow(walletService, dbService);
                     break;
                 case "2":
-                    createTransactionFlow(walletService, transactionService, dbService);
+                    createTransactionFlow(walletService, transactionService, mempoolService, dbService);
                     break;
                 case "3":
                     viewPositionFlow(mempoolService, transactionService);
@@ -61,6 +61,15 @@ public class Main {
                 case "7":
                     listTransactionsDbFlow();
                     break;
+                case "8":
+                    depositFlow();
+                    break;
+                case "9":
+                    advanceTimeFlow(mempoolService);
+                    break;
+                case "10":
+                    clockAndMempoolStateFlow(mempoolService);
+                    break;
                 case "0":
                     running = false;
                     System.out.println("Au revoir!");
@@ -74,13 +83,16 @@ public class Main {
 
     private static void printMenu() {
         System.out.println("==== Wallet Crypto (Java 8) ====");
-        System.out.println("1) Créer un wallet crypto");
-        System.out.println("2) Créer une nouvelle transaction");
-        System.out.println("3) Calculer la position dans le mempool et temps estimé");
+        System.out.println("1) Creer un wallet crypto");
+        System.out.println("2) Creer une nouvelle transaction");
+        System.out.println("3) Calculer la position dans le mempool et temps estime");
         System.out.println("4) Comparer les 3 niveaux de frais");
-        System.out.println("5) Consulter l'état actuel du mempool");
-        System.out.println("6) Lister mes wallets ");
-        System.out.println("7) Lister mes transactions par wallet ");
+        System.out.println("5) Consulter l'etat actuel du mempool");
+        System.out.println("6) Lister mes wallets");
+        System.out.println("7) Lister mes transactions par wallet");
+        System.out.println("8) Deposer des fonds sur un wallet");
+        System.out.println("9) Avancer le temps (minutes) et traiter les confirmations");
+        System.out.println("10) Voir l'horloge/etat du mempool (deterministe)");
         System.out.println("0) Quitter");
         System.out.print("Votre choix: ");
     }
@@ -93,10 +105,10 @@ public class Main {
         if (dbService != null) {
             dbService.saveWallet(wallet);
         }
-        System.out.println("Wallet créé: " + wallet);
+        System.out.println("Wallet cree: " + wallet);
     }
 
-    private static void createTransactionFlow(WalletService walletService, TransactionService txService, DbPersistenceService dbService) {
+    private static void createTransactionFlow(WalletService walletService, TransactionService txService, MempoolService mempoolService, DbPersistenceService dbService) {
         System.out.print("ID wallet source: ");
         String walletId = SCANNER.nextLine().trim();
         Wallet wallet = walletService.findById(walletId);
@@ -118,7 +130,7 @@ public class Main {
         try {
             amount = new BigDecimal(amountStr);
             if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-                System.out.println("Montant doit être > 0.");
+                System.out.println("Montant doit etre > 0.");
                 return;
             }
         } catch (Exception e) {
@@ -126,15 +138,20 @@ public class Main {
             return;
         }
 
-        System.out.println("Priorité (1=ECONOMIQUE, 2=STANDARD, 3=RAPIDE): ");
+        System.out.println("Priorite (1=ECONOMIQUE, 2=STANDARD, 3=RAPIDE): ");
         String p = SCANNER.nextLine().trim();
         Priority priority = "3".equals(p) ? Priority.RAPIDE : ("2".equals(p) ? Priority.STANDARD : Priority.ECONOMIQUE);
 
         Transaction tx = txService.createTransaction(wallet, wallet.getAddress(), to, amount, priority);
         if (dbService != null) {
             dbService.saveTransaction(tx, wallet.getId());
+            // Debiter le wallet: montant + fees
+            java.math.BigDecimal totalDebit = amount.add(tx.getFee());
+            dbService.updateWalletBalance(wallet.getId(), totalDebit.negate());
         }
-        System.out.println("Transaction créée: " + tx.getId());
+        // Enqueue dans le mempool deterministe
+        mempoolService.enqueue(tx);
+        System.out.println("Transaction creee: " + tx.getId());
         System.out.println(tx);
     }
 
@@ -185,7 +202,7 @@ public class Main {
         int posF = mempoolService.calculatePosition(fast);
         int total = mempoolService.getPendingCount();
 
-        ConsoleTable table = new ConsoleTable("Priorité", "Fees", "Position", "Temps estimé");
+        ConsoleTable table = new ConsoleTable("Priorite", "Fees", "Position", "Temps estime");
         table.addRow("ECONOMIQUE", econ.getFee().toPlainString(), String.valueOf(posE) + "/" + total, (posE * 10) + " min");
         table.addRow("STANDARD", std.getFee().toPlainString(), String.valueOf(posS) + "/" + total, (posS * 10) + " min");
         table.addRow("RAPIDE", fast.getFee().toPlainString(), String.valueOf(posF) + "/" + total, (posF * 10) + " min");
@@ -193,7 +210,7 @@ public class Main {
     }
 
     private static void viewMempoolFlow(MempoolService mempoolService) {
-        mempoolService.regenerateRandomMempool(15, null);
+        // plus de generation aleatoire
         List<Transaction> list = mempoolService.getPendingTransactionsOrdered();
         ConsoleTable table = new ConsoleTable("ID", "Type", "Priority", "Fees");
         for (Transaction t : list) {
@@ -204,7 +221,7 @@ public class Main {
 
     private static void listWalletsDbFlow() {
         if (dbSvc == null) {
-            System.out.println("Base de données non connectée.");
+            System.out.println("Base de donnees non connectee.");
             return;
         }
         List<String[]> rows = dbSvc.listWallets();
@@ -215,7 +232,7 @@ public class Main {
 
     private static void listTransactionsDbFlow() {
         if (dbSvc == null) {
-            System.out.println("Base de données non connectée.");
+            System.out.println("Base de donnees non connectee.");
             return;
         }
         System.out.print("Wallet ID: ");
@@ -224,6 +241,55 @@ public class Main {
         ConsoleTable t = new ConsoleTable("ID", "Type", "From", "To", "Amount", "Priority", "Fee", "Status", "Created");
         for (String[] r : rows) t.addRow(r);
         System.out.println(t.render());
+    }
+
+    private static void depositFlow() {
+        if (dbSvc == null) {
+            System.out.println("Base de donnees non connectee.");
+            return;
+        }
+        System.out.print("Wallet ID: ");
+        String walletId = SCANNER.nextLine().trim();
+        System.out.print("Montant a deposer: ");
+        String amt = SCANNER.nextLine().trim();
+        try {
+            java.math.BigDecimal delta = new java.math.BigDecimal(amt);
+            if (delta.compareTo(java.math.BigDecimal.ZERO) <= 0) {
+                System.out.println("Montant doit etre > 0.");
+                return;
+            }
+            dbSvc.updateWalletBalance(walletId, delta);
+            System.out.println("Depot effectue.");
+        } catch (Exception e) {
+            System.out.println("Montant invalide.");
+        }
+    }
+
+    private static void advanceTimeFlow(MempoolService mempoolService) {
+        if (dbSvc == null) {
+            System.out.println("Base de donnees non connectee.");
+            return;
+        }
+        System.out.print("Minutes a avancer: ");
+        String m = SCANNER.nextLine().trim();
+        try {
+            long minutes = Long.parseLong(m);
+            mempoolService.advanceAndConfirm(minutes, dbSvc);
+            System.out.println("Temps avance. Minutes courantes: " + mempoolService.getCurrentMinutes());
+        } catch (Exception e) {
+            System.out.println("Valeur invalide.");
+        }
+    }
+
+    private static void clockAndMempoolStateFlow(MempoolService mempoolService) {
+        System.out.println("Horloge (minutes): " + mempoolService.getCurrentMinutes());
+        List<Transaction> list = mempoolService.getPendingTransactionsOrdered();
+        ConsoleTable table = new ConsoleTable("ID", "Fees", "Priority", "Remaining(min)");
+        for (Transaction t : list) {
+            Long rem = mempoolService.getRemainingMinutes(t.getId());
+            table.addRow(shorten(t.getId()), t.getFee().toPlainString(), t.getPriority().name(), rem == null ? "-" : String.valueOf(rem));
+        }
+        System.out.println(table.render());
     }
 
     private static String shorten(String id) {

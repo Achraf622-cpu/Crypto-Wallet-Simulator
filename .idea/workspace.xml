@@ -5,7 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c41570b1-38cc-40f5-a308-0cdfc62b84aa" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/src/com/crypto/app/db/Database.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/crypto/app/db/Database.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/crypto/app/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/crypto/app/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/crypto/app/repository/InMemoryTransactionRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/crypto/app/repository/InMemoryTransactionRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/crypto/app/service/DbPersistenceService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/crypto/app/service/DbPersistenceService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/crypto/app/service/MempoolService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/crypto/app/service/MempoolService.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
