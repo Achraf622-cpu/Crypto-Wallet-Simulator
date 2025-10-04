@@ -11,7 +11,7 @@ public class EthereumTransaction extends Transaction {
 
     @Override
     public BigDecimal calculateFee() {
-        // Fee = gasLimit * gasPrice (in ETH)
+        // Fee = gasLimit * gasPrice (in ETH). We'll simulate with fictional values.
         long gasLimit = 21000; // standard ETH transfer
         long gasPriceGwei;
         switch (getPriority()) {
@@ -24,7 +24,7 @@ public class EthereumTransaction extends Transaction {
             default:
                 gasPriceGwei = 10; // economical
         }
-
+        // Convert gwei to ETH: 1 ETH = 1e9 gwei
         BigDecimal gas = new BigDecimal(gasLimit);
         BigDecimal priceEth = new BigDecimal(gasPriceGwei).divide(new BigDecimal(1_000_000_000L), 9, RoundingMode.HALF_UP);
         return gas.multiply(priceEth).setScale(9, RoundingMode.HALF_UP);
