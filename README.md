@@ -74,3 +74,10 @@ java -cp "out;lib\postgresql-42.7.4.jar" com.crypto.app.Main
 - Aucune donnée visible dans la DB → vérifier que vous exécutez l’appli avec les variables JDBC correctement définies et que vous interrogez la bonne base `crypto_wallet`
 
 
+### Screenshots
+- `Menu Principale`
+![alt text](image.png)
+- `Architecture (En couche)`
+![alt text](image-1.png)
+- `Comparaison de mempool`
+![alt text](image-2.png)
