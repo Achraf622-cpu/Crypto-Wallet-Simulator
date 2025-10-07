@@ -122,6 +122,8 @@ public class MempoolService {
         Collections.sort(list);
         return list;
     }
+
+    public double getTotal
 }
 
 

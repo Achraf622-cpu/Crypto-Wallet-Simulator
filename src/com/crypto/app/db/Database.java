@@ -1,70 +1,51 @@
-package com.crypto.app.db;
-
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 
-public final class Database {
-    private static Database INSTANCE;
+public class Database {
+
+    private static Database instance;
     private Connection connection;
 
     private Database() {}
 
-    public static synchronized Database getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new Database();
+    public static Database getInstance() {
+        if (instance == null) {
+            instance = new Database();
         }
-        return INSTANCE;
+        return instance;
     }
 
-    public void connect(String jdbcUrl) {
-        try {
-            this.connection = DriverManager.getConnection(jdbcUrl);
-            this.connection.setAutoCommit(true);
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to connect DB: " + e.getMessage(), e);
-        }
-    }
+    public void connect() {
+        Properties props = new Properties();
+        try (FileInputStream fis = new FileInputStream("config.properties")) {
+            props.load(fis);
 
-    public void connect(String jdbcUrl, String user, String password, String driverClass) {
-        try {
-            if (driverClass != null && driverClass.trim().length() > 0) {
-                try {
-                    Class.forName(driverClass.trim());
-                } catch (ClassNotFoundException e) {
-                    throw new RuntimeException("JDBC driver not found: " + driverClass, e);
-                }
+            String url = props.getProperty("jdbc.url");
+            String user = props.getProperty("jdbc.user");
+            String password = props.getProperty("jdbc.password");
+            String driver = props.getProperty("jdbc.driver");
+
+            if (driver != null && !driver.isBlank()) {
+                Class.forName(driver);
             }
-            this.connection = (user != null)
-                    ? DriverManager.getConnection(jdbcUrl, user, password == null ? "" : password)
-                    : DriverManager.getConnection(jdbcUrl);
-            this.connection.setAutoCommit(true);
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to connect DB: " + e.getMessage(), e);
-        }
-    }
 
-    public void connectFromEnvOrDefault() {
-        String url = System.getenv("JDBC_URL");
-        if (url != null && url.trim().length() > 0) {
-            String user = System.getenv("JDBC_USER");
-            String pass = System.getenv("JDBC_PASSWORD");
-            String driver = System.getenv("JDBC_DRIVER");
-            connect(url.trim(), user, pass, driver);
-        } else {
-            // Default to a local Postgres database if not provided
-            connect("jdbc:postgresql://localhost:5432/crypto_wallet", "postgres", "password", "org.postgresql.Driver");
+            connection = DriverManager.getConnection(url, user, password);
+            connection.setAutoCommit(true);
+
+            System.out.println("Connected to DB successfully!");
+        } catch (IOException | ClassNotFoundException | SQLException e) {
+            throw new RuntimeException("Could not connect to DB: " + e.getMessage(), e);
         }
     }
 
     public Connection getConnection() {
         if (connection == null) {
-            throw new IllegalStateException("Database not connected");
+            throw new IllegalStateException("Database not connected yet!");
         }
         return connection;
     }
-
-
 }
-
-
